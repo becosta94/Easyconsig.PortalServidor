@@ -5,18 +5,23 @@ import { LinearGradient } from 'expo-linear-gradient';
 import EsqueciSenhaModal from '@/components/EsqueciMinhaSenhaModal';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { login } from '@/services/authService';
+import { Picker } from '@react-native-picker/picker';
+import CidadeSelect from '@/components/CidadeSelect';
 
 export default function LoginScreen() {
   const [cidade, setCidade] = useState('');
   const [cpf, setCpf] = useState('');
+  const [matricula, setMatricula] = useState('');
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [cidadeError, setCidadeError] = useState('');
   const [cpfError, setCpfError] = useState('');
+  const [matriculaError, setMatriculaError] = useState('');
   const [senhaError, setSenhaError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-    const router = useRouter();
-  
+  const router = useRouter();
+
   return (
     <LinearGradient
       colors={['#244D60', '#D3D6D8', '#FFFFFF']}
@@ -35,23 +40,12 @@ export default function LoginScreen() {
         <View style={styles.card}>
           <Text style={styles.title}>Acesso</Text>
 
-          <View style={[
-            styles.inputContainer,
-            cidadeError ? styles.inputContainerError : null
-          ]}>
-            <Ionicons name="location-outline" size={22} color="#2D2D2F" style={styles.icon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Cidade"
-              value={cidade}
-              onChangeText={text => {
-                setCidade(text);
-                if (text) setCidadeError('');
-              }}
-              placeholderTextColor={cidadeError ? '#E53935' : '#A0A0A0'}
-            />
-            <MaterialIcons name="arrow-drop-down" size={24} color="#2D2D2F" />
-          </View>
+          <CidadeSelect
+            cidade={cidade}
+            setCidade={setCidade}
+            cidadeError={cidadeError}
+            setCidadeError={setCidadeError}
+          />
           {cidadeError ? <Text style={styles.errorText}>{cidadeError}</Text> : null}
 
           <View style={[
@@ -72,6 +66,26 @@ export default function LoginScreen() {
             />
           </View>
           {cpfError ? <Text style={styles.errorText}>{cpfError}</Text> : null}
+
+          <View style={[
+            styles.inputContainer,
+            matriculaError ? styles.inputContainerError : null
+          ]}>
+            <Ionicons name="person-outline" size={22} color="#2D2D2F" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Matrícula"
+              value={matricula}
+              onChangeText={text => {
+                setMatricula(text);
+                if (text) setMatriculaError('');
+              }}
+              keyboardType="numeric"
+              placeholderTextColor={matriculaError ? '#E53935' : '#A0A0A0'}
+            />
+          </View>
+          {matriculaError ? <Text style={styles.errorText}>{matriculaError}</Text> : null}
+
 
           <View style={[
             styles.inputContainer,
@@ -118,6 +132,13 @@ export default function LoginScreen() {
                 setCpfError('');
               }
 
+              if (!matricula) {
+                setMatriculaError('Informe a matrícula');
+                hasError = true;
+              } else {
+                setMatriculaError('');
+              }
+
               if (!senha) {
                 setSenhaError('Informe a senha');
                 hasError = true;
@@ -129,27 +150,17 @@ export default function LoginScreen() {
 
               // Chamada à API
               try {
-                // const response = await fetch('SUA_URL_DA_API', {
-                //   method: 'POST',
-                //   headers: { 'Content-Type': 'application/json' },
-                //   body: JSON.stringify({ cidade, cpf, senha }),
-                // });
-                // const data = await response.json();
+                const response = await login(cpf, senha, cidade, matricula);
+                if (!response) {
+                  setCpfError(' ');
+                  setMatriculaError(' ');
+                  setSenhaError('CPF ou matricula ou senha inválidos');
+                  return;
+                }
+                router.replace('/(tabs)');
 
-                // if (!response.ok) {
-                //   // Exemplo: supondo que a API retorna { field: 'cpf' | 'senha', message: '...' }
-                //   if (data.field === 'cpf') setCpfError(data.message || 'CPF inválido');
-                //   if (data.field === 'senha') setSenhaError(data.message || 'Senha inválida');
-                //   if (!data.field) {
-                //     setCpfError('CPF ou senha inválidos');
-                //     setSenhaError('CPF ou senha inválidos');
-                //   }
-                //   return;
-                // }
-                router.navigate('/(tabs)');
-                // Se sucesso, prossiga com o login...
-                // Exemplo: navegação, salvar token, etc.
               } catch (e) {
+                console.log(e);
                 setCpfError('Erro de conexão');
                 setSenhaError('Erro de conexão');
               }
@@ -185,7 +196,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '90%',
-    backgroundColor: '#FAFAFA66', 
+    backgroundColor: '#FAFAFA66',
     borderRadius: 20,
     padding: 24,
     shadowRadius: 8,

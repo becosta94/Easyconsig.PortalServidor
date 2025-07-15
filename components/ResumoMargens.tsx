@@ -1,25 +1,32 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { HeaderUsuarioProps } from './HeaderUsuario';
 
-const ResumoCards: React.FC = () => (
-  <View style={styles.cardsRow}>
-    <View style={styles.card}>
-      <Text style={styles.cardIcon}>📋</Text>
-      <Text style={styles.cardTitle}>Consignado</Text>
-      <Text style={styles.cardValue}>R$ 350,00</Text>
+const ResumoCards: React.FC<{ data: HeaderUsuarioProps }> = ({ data }) => {
+  // Exemplo de uso dos dados recebidos:
+  // Você pode formatar os valores conforme necessário
+  const formatCurrency = (value: number) => `R$ ${value.toFixed(2).replace('.', ',')}`;
+
+  return (
+    <View style={styles.cardsRow}>
+      <View style={styles.card}>
+        <Text style={styles.cardIcon}>📋</Text>
+        <Text style={styles.cardTitle}>Consignado</Text>
+        <Text style={styles.cardValue}>{formatCurrency(data.margem)}</Text>
+      </View>
+      <View style={styles.card}>
+        <Text style={styles.cardIcon}>💳</Text>
+        <Text style={styles.cardTitle}>Crédito</Text>
+        <Text style={styles.cardValue}>{formatCurrency(data.margemCartao)}</Text>
+      </View>
+      <View style={styles.card}>
+        <Text style={styles.cardIcon}>🎁</Text>
+        <Text style={styles.cardTitle}>Benefício</Text>
+        <Text style={styles.cardValue}>{formatCurrency(data.margemReservada)}</Text>
+      </View>
     </View>
-    <View style={styles.card}>
-      <Text style={styles.cardIcon}>💳</Text>
-      <Text style={styles.cardTitle}>Crédito</Text>
-      <Text style={styles.cardValue}>R$ 350,00</Text>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.cardIcon}>🎁</Text>
-      <Text style={styles.cardTitle}>Benefício</Text>
-      <Text style={styles.cardValue}>R$ 350,00</Text>
-    </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   cardsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },

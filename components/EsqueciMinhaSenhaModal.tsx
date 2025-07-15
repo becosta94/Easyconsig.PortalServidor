@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import CirculoCheck from './CirculoCheck';
 import { useRouter } from 'expo-router';
 
@@ -64,7 +64,7 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
         <View style={styles.container}>
           {/* Botão de fechar */}
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-            <Icon name="close" size={24} color="#333" />
+            <MaterialIcons name="close" size={24} color="#333" />
           </TouchableOpacity>
 
           <Text style={styles.title}>Esqueci a senha</Text>
@@ -78,7 +78,7 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
             <>
               <Text style={styles.subtitle}>Digite o e-mail cadastrado</Text>
               <View style={styles.inputContainer}>
-                <Icon name="email" size={24} color="#333" style={styles.inputIcon} />
+                <MaterialIcons name="email" size={24} color="#333" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="E-mail"

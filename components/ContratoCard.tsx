@@ -1,32 +1,36 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 type ContractCardProps = {
   contractNumber: string;
   service: string;
-  eventValue: string;
+  valorParcela: string;
   valorSuspenso: string;
-  parcela: string;
-  prazo: string;
-  dataInclusao: string;
-  dataFinalizacao: string;
+  parcelaAtual: string;
+  quantidadeParcelas: string;
+  dtInclusao: string;
+  dtFinalizacao: string;
   expanded?: boolean;
 };
 
 const ContratoCard: React.FC<ContractCardProps> = ({
   contractNumber,
   service,
-  eventValue,
+  valorParcela,
   valorSuspenso,
-  parcela,
-  prazo,
-  dataInclusao,
-  dataFinalizacao,
+  parcelaAtual,
+  quantidadeParcelas,
+  dtInclusao,
+  dtFinalizacao,
   expanded: expandedProp = false,
 }) => {
   const [expanded, setExpanded] = useState(expandedProp);
-
+  const formatDateOnly = (dateTimeString: string) => {
+    if (!dateTimeString || dateTimeString === "0001-01-01T00:00:00") return "-";
+    const [year, month, day] = dateTimeString.split('T')[0].split('-');
+    return `${day}-${month}-${year}`;
+  };
   return (
     <TouchableOpacity
       style={styles.card}
@@ -44,7 +48,11 @@ const ContratoCard: React.FC<ContractCardProps> = ({
         </View>
         <View style={styles.headerCol}>
           <Text style={styles.label}>Evento valor</Text>
-          <Text style={styles.value}>{eventValue}</Text>
+          <Text style={styles.value}>
+            R$ {valorParcela && !isNaN(parseFloat(valorParcela))
+              ? parseFloat(valorParcela).toFixed(2).replace('.', ',')
+              : '0,00'}
+          </Text>
         </View>
         <TouchableOpacity
           style={styles.expandButton}
@@ -62,23 +70,27 @@ const ContratoCard: React.FC<ContractCardProps> = ({
         <View style={styles.expandedContent}>
           <View style={styles.expandedCol}>
             <Text style={styles.label}>Valor suspenso</Text>
-            <Text style={styles.value}>{valorSuspenso}</Text>
+            <Text style={styles.value}>
+              R$ {valorSuspenso && !isNaN(parseFloat(valorSuspenso))
+                ? parseFloat(valorSuspenso).toFixed(2).replace('.', ',')
+                : '0,00'}
+            </Text>
           </View>
           <View style={styles.expandedCol}>
             <Text style={styles.label}>Parcela</Text>
-            <Text style={styles.value}>{parcela}</Text>
+            <Text style={styles.value}>{parcelaAtual}</Text>
           </View>
           <View style={styles.expandedCol}>
             <Text style={styles.label}>Prazo</Text>
-            <Text style={styles.value}>{prazo}</Text>
+            <Text style={styles.value}>{quantidadeParcelas}</Text>
           </View>
           <View style={styles.expandedCol}>
             <Text style={styles.label}>Data inclusão</Text>
-            <Text style={styles.value}>{dataInclusao}</Text>
+            <Text style={styles.value}>{formatDateOnly(dtInclusao)}</Text>
           </View>
           <View style={styles.expandedCol}>
             <Text style={styles.label}>Data finalização</Text>
-            <Text style={styles.value}>{dataFinalizacao}</Text>
+            <Text style={styles.value}>{formatDateOnly(dtFinalizacao)}</Text>
           </View>
         </View>
       )}

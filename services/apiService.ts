@@ -8,33 +8,47 @@ export async function apiRequest<T = any>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   body?: any,
-  token?: string
 ): Promise<T> {
   try {
-    const token = await getToken();
-
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+    const tokenValue = await getToken();
+    // Só adiciona Content-Type se NÃO for FormData
+    const headers: HeadersInit = {};
+    if (!(body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
     }
+    if (tokenValue) {
+      headers["Authorization"] = `Bearer ${tokenValue}`;
+    }
+
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: body
+        ? body instanceof FormData
+          ? body
+          : JSON.stringify(body)
+        : undefined,
     });
+    const text = await response.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = text;
+    }
 
-    const data = await response.json();
     if (!response.ok) {
-      const errorMessage =
-        data?.errors?.map((e: any) => e.message).join('\n') ||
-        data?.message ||
-        'Erro na requisição';
-
-      throw new Error(errorMessage);
-
+      let errorMessage = 'Erro na requisição';
+      if (Array.isArray(data?.errors)) {
+        errorMessage = data.errors.map((e: any) => e.message).join('\n');
+      } else if (typeof data?.message === 'string') {
+        errorMessage = data.message;
+      } else if (typeof data === 'string') {
+        errorMessage = data;
+      } else if (typeof data?.detail === 'string') {
+        errorMessage = data.detail;
+      }
+      throw new Error(errorMessage + `\n` + JSON.stringify(response));
     }
 
     return data;

@@ -34,12 +34,8 @@ export default () => ({
       typedRoutes: true
     },
     extra: {
-      API_URL: isProduction
-        ? "https://production.up.railway.app/api"
-        : isHomolog
-          ? "http://192.168.100.5:5235/api"
-          : "http://localhost:3000",
-      ENV: isProduction ? "production" : isHomolog ? "homolog" : "development",
+      API_URL: "https://apiapp.easyconsig.com.br/api",
+      ENV:  "production",
       eas: {
         "projectId": "fb4be8b3-32b4-4388-a83b-423a176f2561"
       }

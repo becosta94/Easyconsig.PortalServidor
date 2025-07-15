@@ -1,11 +1,11 @@
+
 import { apiRequest } from "./apiService";
 import { saveToken } from "./authStorageService";
 
+export async function login(cpf: string, senha: string, codigoCidade: string, matricula: string) {
 
-
-export async function login(email: string, password: string) {
-  const data = await apiRequest("/User/authenticate", "POST", { email, password });
-  const token = data.result;
+  const data = await apiRequest("/Auth/login", "POST", {cpf, senha, codigoCidade, matricula});
+  const token = data.token;
     if (token) {
         await saveToken(token);
         return token;

@@ -1,158 +1,45 @@
 import HeaderUsuario from '@/components/HeaderUsuario';
 import ListaContratos, { Contract } from '@/components/ListaContratos';
 import ListaPropostas from '@/components/ListaPropostas';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder, Dimensions } from 'react-native';
 import type { HeaderUsuarioProps } from '@/components/HeaderUsuario';
 import ResumoCards from '@/components/ResumoMargens';
+import { apiRequest } from '@/services/apiService';
+import { Proposta } from '@/components/PropostaCard';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SNAP_TOP = SCREEN_HEIGHT * 0.14;
-const SNAP_BOTTOM = SCREEN_HEIGHT * 0.40;
+const SNAP_BOTTOM = SCREEN_HEIGHT * 0.41;
 const mainContentHeight = SCREEN_HEIGHT * 0.83;
 
-const contracts: Contract[] = [
-  {
-    contractNumber: "45773889",
-    service: "Empréstimo",
-    eventValue: "R$350,00",
-    valorSuspenso: "0,00",
-    parcela: "43",
-    prazo: "exe",
-    dataInclusao: "10/03/2025",
-    dataFinalizacao: "05/06/2025",
-  },
-  {
-    contractNumber: "23452345",
-    service: "Teste",
-    eventValue: "R$450,32",
-    valorSuspenso: "0,00",
-    parcela: "43",
-    prazo: "exe",
-    dataInclusao: "23/05/2025",
-    dataFinalizacao: "14/08/2025",
-  },
-  {
-    contractNumber: "23452345",
-    service: "Teste",
-    eventValue: "R$450,32",
-    valorSuspenso: "0,00",
-    parcela: "43",
-    prazo: "exe",
-    dataInclusao: "23/05/2025",
-    dataFinalizacao: "14/08/2025",
-  },
-  {
-    contractNumber: "23452345",
-    service: "Teste",
-    eventValue: "R$450,32",
-    valorSuspenso: "0,00",
-    parcela: "43",
-    prazo: "exe",
-    dataInclusao: "23/05/2025",
-    dataFinalizacao: "14/08/2025",
-  },
-  {
-    contractNumber: "23452345",
-    service: "Teste",
-    eventValue: "R$200,32",
-    valorSuspenso: "0,00",
-    parcela: "43",
-    prazo: "exe",
-    dataInclusao: "23/05/2025",
-    dataFinalizacao: "14/08/2025",
-  },
-
-  {
-    contractNumber: "23452345",
-    service: "Teste",
-    eventValue: "R$300,32",
-    valorSuspenso: "0,00",
-    parcela: "43",
-    prazo: "exe",
-    dataInclusao: "23/05/2025",
-    dataFinalizacao: "14/08/2025",
-  },
-
-  {
-    contractNumber: "23452345",
-    service: "Teste",
-    eventValue: "R$500,32",
-    valorSuspenso: "0,00",
-    parcela: "43",
-    prazo: "exe",
-    dataInclusao: "23/05/2025",
-    dataFinalizacao: "14/08/2025",
-  },
-];
-
-const propostas = [
-  {
-    dataProposta: "10/03/2025",
-    service: "Empréstimo",
-    eventValue: "R$200,00",
-    valorSuspenso: "50,00",
-    parcela: "43",
-    prazo: "exe",
-  },
-  {
-    dataProposta: "10/03/2025",
-    service: "Empréstimo",
-    eventValue: "R$200,00",
-    valorSuspenso: "50,00",
-    parcela: "43",
-    prazo: "exe",
-  },
-  {
-    dataProposta: "10/03/2025",
-    service: "Empréstimo",
-    eventValue: "R$200,00",
-    valorSuspenso: "50,00",
-    parcela: "43",
-    prazo: "exe",
-  },
-  {
-    dataProposta: "10/03/2025",
-    service: "Empréstimo",
-    eventValue: "R$200,00",
-    valorSuspenso: "50,00",
-    parcela: "43",
-    prazo: "exe",
-  },
-  {
-    dataProposta: "10/03/2025",
-    service: "Empréstimo",
-    eventValue: "R$200,00",
-    valorSuspenso: "50,00",
-    parcela: "43",
-    prazo: "exe",
-  },
-
-];
-const headerData: HeaderUsuarioProps = {
-  nome: "Joana Souza",
-  cpf: "000.000.000-00",
-  avatarUrl: "https://randomuser.me/api/portraits/women/44.jpg",
-  infoEsquerda: [
-    { label: 'Matrícula', value: 'exemplo' },
-    { label: 'Vínculo empregatício', value: 'exemplo' },
-    { label: 'Data de admissão', value: 'exemplo' },
-    { label: 'Data fim do contrato', value: 'exemplo' },
-    { label: 'Margem cartão de crédito', value: 'exemplo' },
-  ],
-  infoDireita: [
-    { label: 'Secretaria', value: 'exemplo' },
-    { label: 'Status', value: 'exemplo' },
-    { label: 'Data de nascimento', value: 'exemplo' },
-    { label: 'Margem consignado', value: 'exemplo' },
-  ],
-};
 
 
 export default function Home() {
   const translateY = useRef(new Animated.Value(SNAP_BOTTOM)).current;
   const lastTranslateY = useRef(SNAP_BOTTOM); // Armazena a última posição
   const [activeTab, setActiveTab] = useState<'CONSIGNACOES' | 'PROPOSTAS'>('CONSIGNACOES');
+  const [headerData, setHeaderData] = useState<HeaderUsuarioProps | null>(null);
+  const [contractsUser, setContractsUser] = useState<Contract[] | null>(null);
+  const [propostas, setpropostas] = useState<Proposta[] | null>(null);
+
+  useEffect(() => {
+    async function fetchHeaderData() {
+      try {
+        const response1 = await apiRequest('/Servidor/dados', `GET`) // coloque a URL correta aqui
+        setHeaderData(response1);
+        const response2 = await apiRequest('/Contratos', `GET`)
+        setContractsUser(response2);
+        setHeaderData(response1);
+        const response3 = await apiRequest('/Propostas', `GET`)
+        setpropostas(response3);
+      } catch (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+      }
+    }
+    fetchHeaderData();
+  }, []);
+
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
@@ -200,19 +87,27 @@ export default function Home() {
   return (
     <View style={styles.container}>
 
-      <HeaderUsuario data={headerData} />
+      {headerData ? (
+        <HeaderUsuario data={headerData} />
+      ) : (
+        <Text style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>Carregando...</Text>
+      )}
 
       <Animated.View
         style={[
           styles.mainContent,
-          { transform: [{ translateY }], height: mainContentHeight }, 
+          { transform: [{ translateY }], height: mainContentHeight },
         ]}
         {...panResponder.panHandlers}
       >
         <View style={styles.handle} />
 
-        <ResumoCards />
-        
+        {headerData ? (
+          <ResumoCards data={headerData} />
+        ) : (
+          <Text>Carregando resumo...</Text>
+        )}
+
         <View style={styles.tabsRow}>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'CONSIGNACOES' && styles.tabActive]}
@@ -232,9 +127,16 @@ export default function Home() {
           </TouchableOpacity>
         </View>
         {activeTab === 'CONSIGNACOES' ? (
-          <ListaContratos contracts={contracts} />
+          contractsUser ? (
+            <ListaContratos contractsUser={contractsUser} />
+          ) : (
+            <Text>Carregando resumo...</Text>)
+
         ) : (
-          <ListaPropostas propostas={propostas} onAccept={idx => alert(`Proposta ${idx + 1} aceita!`)} />
+          propostas ? (
+            <ListaPropostas propostas={propostas} onAccept={idx => alert(`Proposta ${idx + 1} aceita!`)} />
+          ) : (
+            <Text>Carregando resumo...</Text>)
         )}
 
       </Animated.View >

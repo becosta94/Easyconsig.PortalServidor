@@ -3,24 +3,25 @@ import { FlatList, ScrollView } from 'react-native';
 import ContractCard from '@/components/ContratoCard';
 
 export type Contract = {
+  cdBaseConsignacao: string;
   contractNumber: string;
   service: string;
-  eventValue: string;
+  valorParcela: string;
   valorSuspenso: string;
-  parcela: string;
-  prazo: string;
-  dataInclusao: string;
-  dataFinalizacao: string;
+  parcelaAtual: string;
+  quantidadeParcelas: string;
+  dtInclusao: string;
+  dtFinalizacao: string;
 };
 
-type ContractListProps = {
-  contracts: Contract[];
+export type ContractListProps = {
+  contractsUser: Contract[];
 };
 
-const ListaContratos: React.FC<ContractListProps> = ({ contracts }) => (
+const ListaContratos: React.FC<ContractListProps> = ({ contractsUser }) => (
   <FlatList
-    data={contracts}
-    keyExtractor={(item, index) => item.contractNumber + index}
+    data={contractsUser}
+    keyExtractor={(item, index) => item.cdBaseConsignacao + index}
     renderItem={({ item }) => {
       return <ContractCard {...item} />;
     }}

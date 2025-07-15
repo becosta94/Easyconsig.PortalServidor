@@ -2,51 +2,59 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 export type Proposta = {
-  dataProposta: string;
+  dtProposta: string;
   service: string;
-  eventValue: string;
-  valorSuspenso: string;
-  parcela: string;
-  prazo: string;
+  vlPrestacao: string;
+  dtAceite: string;
+  quantidadeParcelas: string;
 };
 
 type PropostaCardProps = Proposta & {
   onAccept?: () => void;
 };
+const formatDateOnly = (dateTimeString: string) => {
+  if (!dateTimeString || dateTimeString === "0001-01-01T00:00:00") return "-";
+  const [year, month, day] = dateTimeString.split('T')[0].split('-');
+  return `${day}-${month}-${year}`;
+};
 
 const PropostaCard: React.FC<PropostaCardProps> = ({
-  dataProposta,
+  dtProposta,
   service,
-  eventValue,
-  valorSuspenso,
-  parcela,
-  prazo,
+  vlPrestacao,
+  dtAceite,
+  quantidadeParcelas,
   onAccept,
 }) => (
   <View style={styles.card}>
     <View style={styles.row}>
       <View style={styles.col}>
         <Text style={styles.label}>Data proposta</Text>
-        <Text style={styles.value}>{dataProposta}</Text>
-        <Text style={styles.label}>Valor suspenso</Text>
-        <Text style={styles.value}>{valorSuspenso}</Text>
+        <Text style={styles.value}>{formatDateOnly(dtProposta)}</Text>
+        <Text style={styles.label}>Data aceite</Text>
+        <Text style={styles.value}>{formatDateOnly(dtAceite)}</Text>
       </View>
       <View style={styles.col}>
         <Text style={styles.label}>Serviço</Text>
         <Text style={styles.value}>{service}</Text>
-        <Text style={styles.label}>Parcela</Text>
-        <Text style={styles.value}>{parcela}</Text>
+        <Text style={styles.label}>Prazo</Text>
+        <Text style={styles.value}>{quantidadeParcelas}</Text>
       </View>
       <View style={styles.col}>
         <Text style={styles.label}>Evento valor</Text>
-        <Text style={styles.value}>{eventValue}</Text>
-        <Text style={styles.label}>Prazo</Text>
-        <Text style={styles.value}>{prazo}</Text>
+        <Text style={styles.value}>
+          R$ {vlPrestacao && !isNaN(parseFloat(vlPrestacao))
+            ? parseFloat(vlPrestacao).toFixed(2).replace('.', ',')
+            : '0,00'}
+        </Text>
+
       </View>
     </View>
-    <TouchableOpacity style={styles.button} onPress={onAccept}>
-      <Text style={styles.buttonText}>ACEITAR</Text>
-    </TouchableOpacity>
+    {!dtAceite && (
+      <TouchableOpacity style={styles.button} onPress={onAccept}>
+        <Text style={styles.buttonText}>ACEITAR</Text>
+      </TouchableOpacity>
+    )}
   </View>
 );
 

@@ -13,10 +13,6 @@ export {
   ErrorBoundary,
 } from 'expo-router';
 
-SplashScreen.setOptions({
-  duration: 1000,
-  fade: true,
-});
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -34,11 +30,13 @@ export default function RootLayout() {
         const isValid = !!token;
         setIsLoggedIn(isValid);
         if (!isValid) {
+          console.log('aqui');
           setTimeout(() => {
             router.replace("/auth/login");
           }, 0);
         }
       } catch (error) {
+        console.log('aqui2');
         console.error("Erro ao verificar o status de login:", error);
         setIsLoggedIn(false);
         setTimeout(() => {
@@ -50,22 +48,25 @@ export default function RootLayout() {
     checkLoginStatus();
   }, []);
 
+
+
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
-
-  useEffect(() => {
     if (isLoggedIn !== null) {
       SplashScreen.hideAsync();
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, loaded]);
+
+  if (isLoggedIn === null) {
+    return null; // Exibe tela de loading até carregar
+  }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-
       <GestureHandlerRootView style={{ flex: 1 }}>
+
         {isLoggedIn ? (
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -73,10 +74,11 @@ export default function RootLayout() {
           </Stack>
         ) : (
           <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/login" options={{ headerShown: false }} />
           </Stack>
         )}
       </GestureHandlerRootView>
+
     </ThemeProvider>
   )
 }
