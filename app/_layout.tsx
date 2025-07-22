@@ -30,13 +30,11 @@ export default function RootLayout() {
         const isValid = !!token;
         setIsLoggedIn(isValid);
         if (!isValid) {
-          console.log('aqui');
           setTimeout(() => {
             router.replace("/auth/login");
           }, 0);
         }
       } catch (error) {
-        console.log('aqui2');
         console.error("Erro ao verificar o status de login:", error);
         setIsLoggedIn(false);
         setTimeout(() => {

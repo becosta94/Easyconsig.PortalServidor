@@ -22,6 +22,17 @@ export default function LoginScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
 
+  function formatCpf(cpf: string) {
+    // Remove tudo que não for número
+    cpf = cpf.replace(/\D/g, '');
+    // Aplica a máscara
+    return cpf
+      .replace(/^(\d{3})(\d)/, '$1.$2')
+      .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+      .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4')
+      .slice(0, 14); // Limita a 14 caracteres (000.000.000-00)
+  }
+
   return (
     <LinearGradient
       colors={['#244D60', '#D3D6D8', '#FFFFFF']}
@@ -56,13 +67,15 @@ export default function LoginScreen() {
             <TextInput
               style={styles.input}
               placeholder="CPF"
-              value={cpf}
+              value={formatCpf(cpf)}
               onChangeText={text => {
-                setCpf(text);
-                if (text) setCpfError('');
+                const onlyNumbers = text.replace(/\D/g, '');
+                setCpf(onlyNumbers);
+                if (onlyNumbers) setCpfError('');
               }}
               keyboardType="numeric"
               placeholderTextColor={cpfError ? '#E53935' : '#A0A0A0'}
+              maxLength={14}
             />
           </View>
           {cpfError ? <Text style={styles.errorText}>{cpfError}</Text> : null}
@@ -151,17 +164,16 @@ export default function LoginScreen() {
               // Chamada à API
               try {
                 const response = await login(cpf, senha, cidade, matricula);
-                if (!response) {
-                  setCpfError(' ');
-                  setMatriculaError(' ');
-                  setSenhaError('CPF ou matricula ou senha inválidos');
-                  return;
-                }
+                if (typeof response === 'object' && response !== null && 'message' in response) {
+                    setCpfError(' ');
+                    setMatriculaError(' ');
+                    setSenhaError(response.message);
+                    return;
+                } 
                 router.replace('/(tabs)');
-
               } catch (e) {
-                console.log(e);
-                setCpfError('Erro de conexão');
+                setCpfError(' ');
+                setMatriculaError(' ');
                 setSenhaError('Erro de conexão');
               }
             }}

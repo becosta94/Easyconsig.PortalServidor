@@ -28,7 +28,7 @@ const HeaderUsuario: React.FC<{ data: HeaderUsuarioProps }> = ({ data }) => {
   function maskCPF(cpf: string) {
     // Remove tudo que não for número
     if (!cpf) return "-";
-    const cleaned = cpf.replace(/\D/g, '');
+    const cleaned = cpf.replace(/\D/g, '').padStart(11, "0");
     // Aplica a máscara se tiver 11 dígitos
     if (cleaned.length === 11) {
       return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');

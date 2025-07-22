@@ -36,7 +36,6 @@ export async function apiRequest<T = any>(
     } catch {
       data = text;
     }
-
     if (!response.ok) {
       let errorMessage = 'Erro na requisição';
       if (Array.isArray(data?.errors)) {
@@ -48,12 +47,11 @@ export async function apiRequest<T = any>(
       } else if (typeof data?.detail === 'string') {
         errorMessage = data.detail;
       }
-      throw new Error(errorMessage + `\n` + JSON.stringify(response));
+      throw new Error(errorMessage);
     }
-
     return data;
   } catch (error: any) {
-    console.error("API Error:", error);
+    console.error(error);
     throw error;
   }
 }

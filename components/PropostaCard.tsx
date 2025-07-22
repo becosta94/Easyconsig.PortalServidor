@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { getFlagAceite } from "../services/authStorageService";
 
 export type Proposta = {
   dtProposta: string;
-  service: string;
+  tipoServico: string;
   vlPrestacao: string;
   dtAceite: string;
   quantidadeParcelas: string;
+  consignataria: string;
+  cdPropostaEmprestimo: string;
 };
 
 type PropostaCardProps = Proposta & {
@@ -20,43 +23,60 @@ const formatDateOnly = (dateTimeString: string) => {
 
 const PropostaCard: React.FC<PropostaCardProps> = ({
   dtProposta,
-  service,
+  tipoServico,
   vlPrestacao,
   dtAceite,
   quantidadeParcelas,
+  consignataria,
   onAccept,
-}) => (
-  <View style={styles.card}>
-    <View style={styles.row}>
-      <View style={styles.col}>
-        <Text style={styles.label}>Data proposta</Text>
-        <Text style={styles.value}>{formatDateOnly(dtProposta)}</Text>
-        <Text style={styles.label}>Data aceite</Text>
-        <Text style={styles.value}>{formatDateOnly(dtAceite)}</Text>
-      </View>
-      <View style={styles.col}>
-        <Text style={styles.label}>Serviço</Text>
-        <Text style={styles.value}>{service}</Text>
-        <Text style={styles.label}>Prazo</Text>
-        <Text style={styles.value}>{quantidadeParcelas}</Text>
-      </View>
-      <View style={styles.col}>
-        <Text style={styles.label}>Evento valor</Text>
-        <Text style={styles.value}>
-          R$ {vlPrestacao && !isNaN(parseFloat(vlPrestacao))
-            ? parseFloat(vlPrestacao).toFixed(2).replace('.', ',')
-            : '0,00'}
-        </Text>
+}) => {
+  const [showButton, setShowButton] = useState(false);
 
+  useEffect(() => {
+    const fetchFlag = async () => {
+      try {
+        const value = await getFlagAceite();
+        setShowButton(value === 'S');
+      } catch (e) {
+        setShowButton(false);
+      }
+    };
+    fetchFlag();
+  }, []);
+  return (
+    <View style={styles.card}>
+      <View style={styles.row}>
+        <View style={styles.col}>
+          <Text style={styles.label}>Data proposta</Text>
+          <Text style={styles.value}>{formatDateOnly(dtProposta)}</Text>
+          <Text style={styles.label}>Data aceite</Text>
+          <Text style={styles.value}>{formatDateOnly(dtAceite)}</Text>
+        </View>
+        <View style={styles.col}>
+          <Text style={styles.label}>Serviço</Text>
+          <Text style={styles.value}>{tipoServico}</Text>
+          <Text style={styles.label}>Consignatária</Text>
+          <Text style={styles.value}>{consignataria}</Text>
+        </View>
+        <View style={styles.col}>
+          <Text style={styles.label}>Evento valor</Text>
+          <Text style={styles.value}>
+            R$ {vlPrestacao && !isNaN(parseFloat(vlPrestacao))
+              ? parseFloat(vlPrestacao).toFixed(2).replace('.', ',')
+              : '0,00'}
+          </Text>
+          <Text style={styles.label}>Prazo</Text>
+          <Text style={styles.value}>{quantidadeParcelas}</Text>
+        </View>
       </View>
+      {!dtAceite && showButton && (
+        <TouchableOpacity style={styles.button} onPress={onAccept}>
+          <Text style={styles.buttonText}>ACEITAR</Text>
+        </TouchableOpacity>
+      )}
     </View>
-    {!dtAceite && (
-      <TouchableOpacity style={styles.button} onPress={onAccept}>
-        <Text style={styles.buttonText}>ACEITAR</Text>
-      </TouchableOpacity>
-    )}
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   card: {

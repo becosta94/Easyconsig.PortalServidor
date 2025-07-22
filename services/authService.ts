@@ -1,13 +1,23 @@
 
 import { apiRequest } from "./apiService";
-import { saveToken } from "./authStorageService";
+import { saveToken, saveFlagAceite } from "./authStorageService";
 
 export async function login(cpf: string, senha: string, codigoCidade: string, matricula: string) {
-
-  const data = await apiRequest("/Auth/login", "POST", {cpf, senha, codigoCidade, matricula});
-  const token = data.token;
+  try {
+    const data = await apiRequest("/Auth/login", "POST", { cpf, senha, codigoCidade, matricula });
+    if (data.status === 401)
+      return data;
+    const flagAceiteContrato = data.servidor.flAcessoPortalServidorPorCpf;
+    if (flagAceiteContrato) {
+      await saveFlagAceite(flagAceiteContrato)
+    }
+    const token = data.token;
     if (token) {
-        await saveToken(token);
-        return token;
-    }    
+      await saveToken(token);
+      return token;
+    };
+  }
+  catch (error: any) {
+    return error;
+  }
 }

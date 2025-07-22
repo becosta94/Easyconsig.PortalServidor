@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 type ContractCardProps = {
-  contractNumber: string;
-  service: string;
+  consignataria: string;
+  tipoServico: string;
   valorParcela: string;
   valorSuspenso: string;
   parcelaAtual: string;
@@ -15,8 +15,8 @@ type ContractCardProps = {
 };
 
 const ContratoCard: React.FC<ContractCardProps> = ({
-  contractNumber,
-  service,
+  consignataria,
+  tipoServico,
   valorParcela,
   valorSuspenso,
   parcelaAtual,
@@ -39,12 +39,12 @@ const ContratoCard: React.FC<ContractCardProps> = ({
     >
       <View style={styles.headerRow}>
         <View style={styles.headerCol}>
-          <Text style={styles.label}>Nº Contrato</Text>
-          <Text style={styles.value}>{contractNumber}</Text>
+          <Text style={styles.label}>Consignatária</Text>
+          <Text style={styles.value}>{consignataria}</Text>
         </View>
         <View style={styles.headerCol}>
           <Text style={styles.label}>Serviço</Text>
-          <Text style={styles.value}>{service}</Text>
+          <Text style={styles.value}>{tipoServico}</Text>
         </View>
         <View style={styles.headerCol}>
           <Text style={styles.label}>Evento valor</Text>

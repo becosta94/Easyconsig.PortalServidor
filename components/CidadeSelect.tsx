@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, View } from 'react-native';
+import { apiRequest } from '@/services/apiService'; // Importe sua função de API
 
 type CidadeSelectProps = {
   cidade: string;
   setCidade: React.Dispatch<React.SetStateAction<string>>;
   cidadeError: string;
   setCidadeError: React.Dispatch<React.SetStateAction<string>>;
+};
+
+// Tipo para os itens do dropdown
+type CidadeItem = {
+  label: string;
+  value: string;
 };
 
 const CidadeSelect: React.FC<CidadeSelectProps> = ({
@@ -17,6 +24,37 @@ const CidadeSelect: React.FC<CidadeSelectProps> = ({
   setCidadeError,
 }) => {
   const [open, setOpen] = useState(false);
+  const [cidades, setCidades] = useState<CidadeItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Buscar cidades da API quando o componente for montado
+  useEffect(() => {
+    const fetchCidades = async () => {
+      try {
+        setLoading(true);
+        const response: string[] = await apiRequest('/Auth/cidades', 'GET'); // Ajuste a URL conforme sua API
+        
+        // Mapear a resposta da API (lista de strings) para o formato esperado pelo DropDownPicker
+        const cidadesFormatadas = response.map((nomeCidade: string) => ({
+          label: nomeCidade,
+          value: nomeCidade,
+        }));
+        
+        setCidades(cidadesFormatadas);
+      } catch (error) {
+        console.error('Erro ao buscar cidades:', error);
+        // Você pode definir cidades padrão em caso de erro
+        setCidades([
+          { label: 'Garopaba', value: 'TesteGaropaba' },
+          { label: 'Icara', value: 'TesteIcara' },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCidades();
+  }, []);
 
   return (
     <View style={styles.row}>
@@ -27,12 +65,9 @@ const CidadeSelect: React.FC<CidadeSelectProps> = ({
           value={cidade}
           setOpen={setOpen}
           setValue={setCidade}
-          items={[
-            { label: 'Garopaba', value: 'TesteGaropaba' },
-            { label: 'Icara', value: 'TesteIcara' },
-            // ...adicione mais cidades aqui
-          ]}
-          placeholder="Selecione a cidade"
+          items={cidades}
+          placeholder={loading ? "Carregando cidades..." : "Selecione a cidade"}
+          disabled={loading}
           style={{
             borderColor: cidadeError ? '#E53935' : '#EBEBEC',
             borderRadius: 24,
@@ -66,7 +101,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 30, // igual ao seu inputContainer
+    marginBottom: 30,
   },
   icon: {
     marginRight: 8,

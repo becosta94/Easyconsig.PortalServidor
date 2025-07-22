@@ -2,7 +2,7 @@ import HeaderUsuario from '@/components/HeaderUsuario';
 import ListaContratos, { Contract } from '@/components/ListaContratos';
 import ListaPropostas from '@/components/ListaPropostas';
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder, Dimensions, Alert } from 'react-native';
 import type { HeaderUsuarioProps } from '@/components/HeaderUsuario';
 import ResumoCards from '@/components/ResumoMargens';
 import { apiRequest } from '@/services/apiService';
@@ -23,22 +23,50 @@ export default function Home() {
   const [contractsUser, setContractsUser] = useState<Contract[] | null>(null);
   const [propostas, setpropostas] = useState<Proposta[] | null>(null);
 
-  useEffect(() => {
-    async function fetchHeaderData() {
-      try {
-        const response1 = await apiRequest('/Servidor/dados', `GET`) // coloque a URL correta aqui
-        setHeaderData(response1);
-        const response2 = await apiRequest('/Contratos', `GET`)
-        setContractsUser(response2);
-        setHeaderData(response1);
-        const response3 = await apiRequest('/Propostas', `GET`)
-        setpropostas(response3);
-      } catch (error) {
-        console.error('Erro ao buscar dados do usuário:', error);
-      }
+  async function fetchHeaderData() {
+    try {
+      const response1 = await apiRequest('/Servidor/dados', `GET`) // coloque a URL correta aqui
+      setHeaderData(response1);
+      const response2 = await apiRequest('/Contratos', `GET`)
+      setContractsUser(response2);
+      setHeaderData(response1);
+      const response3 = await apiRequest('/Propostas', `GET`)
+      setpropostas(response3);
+    } catch (error) {
+      console.error('Erro ao buscar dados do usuário:', error);
     }
+  }
+
+  useEffect(() => {
     fetchHeaderData();
   }, []);
+
+  async function handleAceitarProposta(id: string) {
+    try {
+      Alert.alert(
+        'Confirmar aceite',
+        `Deseja realmente aceitar a proposta?`,
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Confirmar', onPress: async () => {
+              const payload = { propostaId: id };
+              const response = await apiRequest('/Propostas/aceite', 'POST', payload);
+              if (response.message) {
+                Alert.alert('Sucesso', 'Proposta aceita com sucesso!');
+                await fetchHeaderData(); 
+              } else {
+                Alert.alert('Erro', 'Não foi possível aceitar a proposta.');
+              }
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      Alert.alert('Erro', 'Ocorreu um erro inesperado.');
+    }
+
+  }
 
   const panResponder = useRef(
     PanResponder.create({
@@ -134,7 +162,7 @@ export default function Home() {
 
         ) : (
           propostas ? (
-            <ListaPropostas propostas={propostas} onAccept={idx => alert(`Proposta ${idx + 1} aceita!`)} />
+            <ListaPropostas propostas={propostas} onAccept={idx => handleAceitarProposta(idx)} />
           ) : (
             <Text>Carregando resumo...</Text>)
         )}

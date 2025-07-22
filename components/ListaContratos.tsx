@@ -1,11 +1,11 @@
 import React from 'react';
-import { FlatList, ScrollView } from 'react-native';
+import { FlatList, View } from 'react-native';
 import ContractCard from '@/components/ContratoCard';
 
 export type Contract = {
   cdBaseConsignacao: string;
-  contractNumber: string;
-  service: string;
+  consignataria: string;
+  tipoServico: string;
   valorParcela: string;
   valorSuspenso: string;
   parcelaAtual: string;
@@ -22,12 +22,11 @@ const ListaContratos: React.FC<ContractListProps> = ({ contractsUser }) => (
   <FlatList
     data={contractsUser}
     keyExtractor={(item, index) => item.cdBaseConsignacao + index}
-    renderItem={({ item }) => {
-      return <ContractCard {...item} />;
-    }}
+    renderItem={({ item }) => <ContractCard {...item} />}
     style={{ flex: 1 }}
     showsVerticalScrollIndicator={true}
     contentContainerStyle={{ paddingBottom: 20 }}
+    ListFooterComponent={<View style={{ height: 32 }} />}
   />
 );
 

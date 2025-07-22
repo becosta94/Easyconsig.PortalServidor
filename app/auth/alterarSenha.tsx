@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
@@ -24,7 +24,7 @@ const AlterarSenhaScreen: React.FC<Props> = ({ onSave, onCancel }) => {
             <View style={styles.container}>
 
                 <View style={[styles.inputWrapper, { marginTop: 24 }]}>
-                    <Icon name="lock-outline" size={28} color="#444" style={styles.inputIcon} />
+                    <MaterialIcons name="lock-outline" size={28} color="#444" style={styles.inputIcon} />
                     <TextInput
                         style={styles.input}
                         placeholder="Nova Senha"
@@ -39,7 +39,7 @@ const AlterarSenhaScreen: React.FC<Props> = ({ onSave, onCancel }) => {
                 </View>
 
                 <View style={[styles.inputWrapper, { marginBottom: 80 }]}>
-                    <Icon name="lock-outline" size={28} color="#444" style={styles.inputIcon} />
+                    <MaterialIcons name="lock-outline" size={28} color="#444" style={styles.inputIcon} />
                     <TextInput
                         style={styles.input}
                         placeholder="Confirmar nova senha"
