@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import { Alert } from 'react-native';
+import { apiRequest } from "../../services/apiService";
 
 const { width } = Dimensions.get('window');
 
@@ -16,7 +18,8 @@ const CodigoConfirmacao: React.FC<Props> = ({ email, onResend }) => {
     const [code, setCode] = useState<string>('');
     const [timer, setTimer] = useState<number>(RESEND_SECONDS);
     const inputRefs = useRef<Array<TextInput | null>>([]);
-  const router = useRouter();
+    const router = useRouter();
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (timer === 0) return;
@@ -42,8 +45,13 @@ const CodigoConfirmacao: React.FC<Props> = ({ email, onResend }) => {
         inputRefs.current[0]?.focus();
     };
 
-    const handleSendCode = (code: string) => {
-        router.navigate('/auth/alterarSenha')
+    const handleSendCode = async (code: string) => {
+        const response = await apiRequest('/Usuario/alterar-senha', 'POST', { code });
+        if (response.sucesso || response.status === 200) {
+            router.navigate('/auth/alterarSenha')
+        } else {
+            setError(response.Error);
+        }
     };
 
     return (
@@ -76,6 +84,8 @@ const CodigoConfirmacao: React.FC<Props> = ({ email, onResend }) => {
                         />
                     ))}
                 </View>
+
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
                 <TouchableOpacity
                     style={[
@@ -188,6 +198,14 @@ const styles = StyleSheet.create({
         color: '#244D60',
         textAlign: 'center',
         fontWeight: '500',
+    },
+    errorText: {
+        color: '#E53935',
+        fontSize: 13,
+        marginTop: -24,
+        marginBottom: 16,
+        marginLeft: 8,
+        fontFamily: 'Inter',
     },
 });
 

@@ -64,7 +64,7 @@ const HeaderUsuario: React.FC<{ data: HeaderUsuarioProps }> = ({ data }) => {
           <Text style={styles.label}>Data de admissão</Text>
           <Text style={styles.value}>{formatDate(data.dataAdmissao)}</Text>
 
-          <Text style={styles.label}>Data fim do contrato</Text>
+          <Text style={styles.label}>Prazo final do vinculo</Text>
           <Text style={styles.value}>{formatDate(data.dataFimContrato)}</Text>
 
           <Text style={styles.label}>Margem cartão de crédito</Text>

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import EsqueciSenhaModal from '@/components/EsqueciMinhaSenhaModal';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { login } from '@/services/authService';
-import { Picker } from '@react-native-picker/picker';
 import CidadeSelect from '@/components/CidadeSelect';
 
 export default function LoginScreen() {
@@ -23,14 +21,12 @@ export default function LoginScreen() {
   const router = useRouter();
 
   function formatCpf(cpf: string) {
-    // Remove tudo que não for número
     cpf = cpf.replace(/\D/g, '');
-    // Aplica a máscara
     return cpf
       .replace(/^(\d{3})(\d)/, '$1.$2')
       .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
       .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4')
-      .slice(0, 14); // Limita a 14 caracteres (000.000.000-00)
+      .slice(0, 14); 
   }
 
   return (
@@ -161,7 +157,6 @@ export default function LoginScreen() {
 
               if (hasError) return;
 
-              // Chamada à API
               try {
                 const response = await login(cpf, senha, cidade, matricula);
                 if (typeof response === 'object' && response !== null && 'message' in response) {
@@ -264,7 +259,7 @@ const styles = StyleSheet.create({
   },
   inputContainerError: {
     borderWidth: 1.5,
-    borderColor: '#E53935', // vermelho de erro
+    borderColor: '#E53935',
   },
   errorText: {
     color: '#E53935',

@@ -2,7 +2,7 @@ import HeaderUsuario from '@/components/HeaderUsuario';
 import ListaContratos, { Contract } from '@/components/ListaContratos';
 import ListaPropostas from '@/components/ListaPropostas';
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder, Dimensions, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder, Dimensions, Alert, RefreshControl, ScrollView } from 'react-native';
 import type { HeaderUsuarioProps } from '@/components/HeaderUsuario';
 import ResumoCards from '@/components/ResumoMargens';
 import { apiRequest } from '@/services/apiService';
@@ -22,20 +22,27 @@ export default function Home() {
   const [headerData, setHeaderData] = useState<HeaderUsuarioProps | null>(null);
   const [contractsUser, setContractsUser] = useState<Contract[] | null>(null);
   const [propostas, setpropostas] = useState<Proposta[] | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   async function fetchHeaderData() {
     try {
       const response1 = await apiRequest('/Servidor/dados', `GET`) // coloque a URL correta aqui
-      setHeaderData(response1);
       const response2 = await apiRequest('/Contratos', `GET`)
-      setContractsUser(response2);
-      setHeaderData(response1);
       const response3 = await apiRequest('/Propostas', `GET`)
+      console.log(response2);
+      setHeaderData(response1);
+      setContractsUser(response2);
       setpropostas(response3);
     } catch (error) {
       console.error('Erro ao buscar dados do usuário:', error);
     }
   }
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchHeaderData();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     fetchHeaderData();
@@ -54,7 +61,7 @@ export default function Home() {
               const response = await apiRequest('/Propostas/aceite', 'POST', payload);
               if (response.message) {
                 Alert.alert('Sucesso', 'Proposta aceita com sucesso!');
-                await fetchHeaderData(); 
+                await fetchHeaderData();
               } else {
                 Alert.alert('Erro', 'Não foi possível aceitar a proposta.');
               }
@@ -114,12 +121,19 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-
-      {headerData ? (
-        <HeaderUsuario data={headerData} />
-      ) : (
-        <Text style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>Carregando...</Text>
-      )}
+      <ScrollView
+        style={{ flex: 1 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        {headerData ? (
+          <HeaderUsuario data={headerData} />
+        ) : (
+          <Text style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>Carregando...</Text>
+        )}
+      </ScrollView>
 
       <Animated.View
         style={[

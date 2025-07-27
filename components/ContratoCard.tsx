@@ -7,7 +7,7 @@ type ContractCardProps = {
   tipoServico: string;
   valorParcela: string;
   valorSuspenso: string;
-  parcelaAtual: string;
+  totalParcelas: string;
   quantidadeParcelas: string;
   dtInclusao: string;
   dtFinalizacao: string;
@@ -19,7 +19,7 @@ const ContratoCard: React.FC<ContractCardProps> = ({
   tipoServico,
   valorParcela,
   valorSuspenso,
-  parcelaAtual,
+  totalParcelas,
   quantidadeParcelas,
   dtInclusao,
   dtFinalizacao,
@@ -29,7 +29,7 @@ const ContratoCard: React.FC<ContractCardProps> = ({
   const formatDateOnly = (dateTimeString: string) => {
     if (!dateTimeString || dateTimeString === "0001-01-01T00:00:00") return "-";
     const [year, month, day] = dateTimeString.split('T')[0].split('-');
-    return `${day}-${month}-${year}`;
+    return `${day}/${month}/${year}`;
   };
   return (
     <TouchableOpacity
@@ -78,7 +78,7 @@ const ContratoCard: React.FC<ContractCardProps> = ({
           </View>
           <View style={styles.expandedCol}>
             <Text style={styles.label}>Parcela</Text>
-            <Text style={styles.value}>{parcelaAtual}</Text>
+            <Text style={styles.value}>{totalParcelas}</Text>
           </View>
           <View style={styles.expandedCol}>
             <Text style={styles.label}>Prazo</Text>

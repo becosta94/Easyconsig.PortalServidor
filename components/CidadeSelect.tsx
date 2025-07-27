@@ -43,11 +43,6 @@ const CidadeSelect: React.FC<CidadeSelectProps> = ({
         setCidades(cidadesFormatadas);
       } catch (error) {
         console.error('Erro ao buscar cidades:', error);
-        // Você pode definir cidades padrão em caso de erro
-        setCidades([
-          { label: 'Garopaba', value: 'TesteGaropaba' },
-          { label: 'Icara', value: 'TesteIcara' },
-        ]);
       } finally {
         setLoading(false);
       }

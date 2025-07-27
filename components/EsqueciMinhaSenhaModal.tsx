@@ -3,6 +3,9 @@ import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions,
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import CirculoCheck from './CirculoCheck';
 import { useRouter } from 'expo-router';
+import CidadeSelect from '@/components/CidadeSelect';
+import { apiRequest } from "../services/apiService";
+import { saveCidadeEsqueciSenha, saveMatriculaEsqueciSenha } from "../services/authStorageService";
 
 type EsqueciSenhaModalProps = {
   visible: boolean;
@@ -15,9 +18,13 @@ const { width } = Dimensions.get('window');
 
 const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose }) => {
   const [email, setEmail] = useState<string>('');
+  const [matricula, setMatricula] = useState<string>('');
+  const [cidade, setCidade] = useState('');
+  const [cidadeError, setCidadeError] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
   const [sent, setSent] = useState<boolean>(false);
   const router = useRouter();
+  const [error, setError] = useState('');
 
 
   useEffect(() => {
@@ -27,6 +34,7 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
         router.navigate('../auth/codigoConfirmacao');
         setSent(false);
         setEmail('');
+        setMatricula('');
         onClose();
       }, 3000);
     }
@@ -38,10 +46,17 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
     setLoading(true);
     try {
       // Substitua pela sua API real
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const payload = {
+        email: email,
+        matricula: matricula,
+        codigoCidade: cidade,
+      }
+      const response = await apiRequest("/Auth/resetar-senha", "POST", payload);
+      await saveCidadeEsqueciSenha(cidade);
+      await saveMatriculaEsqueciSenha(matricula);
       setSent(true);
     } catch (error) {
-      // Trate o erro conforme necessário
+      setError('Não foi possível trocar a senha, entre em contato com a administração')
     } finally {
       setLoading(false);
     }
@@ -62,7 +77,6 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
-          {/* Botão de fechar */}
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <MaterialIcons name="close" size={24} color="#333" />
           </TouchableOpacity>
@@ -76,7 +90,12 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
             </>
           ) : (
             <>
-              <Text style={styles.subtitle}>Digite o e-mail cadastrado</Text>
+              <CidadeSelect
+                cidade={cidade}
+                setCidade={setCidade}
+                cidadeError={cidadeError}
+                setCidadeError={setCidadeError}
+              />
               <View style={styles.inputContainer}>
                 <MaterialIcons name="email" size={24} color="#333" style={styles.inputIcon} />
                 <TextInput
@@ -90,6 +109,20 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
                   editable={!loading}
                 />
               </View>
+              <View style={styles.inputContainer}>
+                <Ionicons name="person-outline" size={24} color="#333" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Matricula"
+                  placeholderTextColor="#333"
+                  value={matricula}
+                  onChangeText={setMatricula}
+                  keyboardType="numeric"
+                  autoCapitalize="none"
+                  editable={!loading}
+                />
+              </View>
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
               <TouchableOpacity style={styles.button} onPress={handleSend} disabled={loading || !email}>
                 {loading ? (
                   <ActivityIndicator color="#fff" />
@@ -106,7 +139,6 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
 };
 
 const styles = StyleSheet.create({
-  // ... (os mesmos estilos anteriores)
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.3)',
@@ -191,6 +223,14 @@ const styles = StyleSheet.create({
     color: '#222',
     fontWeight: '500',
     marginTop: 8,
+  },
+  errorText: {
+    color: '#E53935',
+    fontSize: 13,
+    marginTop: -24,
+    marginBottom: 16,
+    marginLeft: 8,
+    fontFamily: 'Inter',
   },
 });
 

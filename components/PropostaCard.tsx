@@ -18,7 +18,7 @@ type PropostaCardProps = Proposta & {
 const formatDateOnly = (dateTimeString: string) => {
   if (!dateTimeString || dateTimeString === "0001-01-01T00:00:00") return "-";
   const [year, month, day] = dateTimeString.split('T')[0].split('-');
-  return `${day}-${month}-${year}`;
+  return `${day}/${month}/${year}`;
 };
 
 const PropostaCard: React.FC<PropostaCardProps> = ({

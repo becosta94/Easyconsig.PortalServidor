@@ -3,6 +3,10 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
+import { Alert } from 'react-native';
+import { apiRequest } from "../../services/apiService";
+import { getCidadeEsqueciSenha, getMatriculaEsqueciSenha } from "../../services/authStorageService";
+
 
 const { width } = Dimensions.get('window');
 
@@ -16,6 +20,45 @@ const AlterarSenhaScreen: React.FC<Props> = ({ onSave, onCancel }) => {
     const [confirm, setConfirm] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+
+    const handleSave = async () => {
+        if (!password) {
+            Alert.alert('Erro', 'Digite a nova senha');
+            return;
+        }
+        if (!confirm) {
+            Alert.alert('Erro', 'Confirme a nova senha');
+            return;
+        }
+        if (password !== confirm) {
+            Alert.alert('Erro', 'As senhas não coincidem');
+            return;
+        }
+        if (password.length < 6) {
+            Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
+            return;
+        }
+        try {
+            const matricula = await getMatriculaEsqueciSenha();
+            const cidade = await getCidadeEsqueciSenha();
+            const payload = {
+                novaSenha: password,
+                matricula: matricula,
+                cidade: cidade
+            };
+            const response = await apiRequest('/Usuario/alterar-senha', 'POST', payload);
+            if (response.sucesso || response.status === 200) {
+                Alert.alert('Sucesso', 'Senha alterada com sucesso!', [
+                    { text: 'OK', onPress: () => onSave(password) }
+                ]);
+            } else {
+                Alert.alert('Erro', response.message || 'Não foi possível alterar a senha');
+            }
+        } catch (error) {
+            Alert.alert('Erro', 'Ocorreu um erro inesperado');
+            console.error('Erro ao alterar senha:', error);
+        }
+    };
 
     return (
         <>

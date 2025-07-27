@@ -8,7 +8,7 @@ export type Contract = {
   tipoServico: string;
   valorParcela: string;
   valorSuspenso: string;
-  parcelaAtual: string;
+  totalParcelas: string;
   quantidadeParcelas: string;
   dtInclusao: string;
   dtFinalizacao: string;
