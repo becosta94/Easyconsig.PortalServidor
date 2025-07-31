@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 
 import { Stack, useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 import { apiRequest } from "../../services/apiService";
+import { getMatriculaEsqueciSenha, getCidadeEsqueciSenha, getCpfEsqueciSenha, saveTokenEsqueciSenha, getEmailEsqueciSenha } from '@/services/authStorageService';
 
 const { width } = Dimensions.get('window');
 
@@ -38,16 +39,35 @@ const CodigoConfirmacao: React.FC<Props> = ({ email, onResend }) => {
         }
     };
 
-    const handleResend = () => {
+    const handleResend = async () => {
         setTimer(RESEND_SECONDS);
         setCode('');
-        onResend();
         inputRefs.current[0]?.focus();
+        const matricula = await getMatriculaEsqueciSenha();
+        const cidade = await getCidadeEsqueciSenha();
+        const email = await getEmailEsqueciSenha();
+        const payload = {
+            email: email,
+            matricula: matricula,
+            codigoCidade: cidade,
+        }
+        await apiRequest("/Auth/resetar-senha", "POST", payload);
     };
 
     const handleSendCode = async (code: string) => {
-        const response = await apiRequest('/Usuario/alterar-senha', 'POST', { code });
-        if (response.sucesso || response.status === 200) {
+        console.log('teste');
+        const matricula = await getMatriculaEsqueciSenha();
+        const cidade = await getCidadeEsqueciSenha();
+        const cpf = await getCpfEsqueciSenha();
+        const payload = {
+            cpf: cpf,
+            matricula: matricula,
+            codigoCidade: cidade,
+            senhaEmail: code
+        }
+        const response = await apiRequest('/Auth/validar-senha', 'POST', payload);
+        if (response.sucesso || response.status === 200 || response === 'Senha válida.') {
+            await saveTokenEsqueciSenha(code);
             router.navigate('/auth/alterarSenha')
         } else {
             setError(response.Error);

@@ -5,7 +5,7 @@ import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 import { apiRequest } from "../../services/apiService";
-import { getCidadeEsqueciSenha, getMatriculaEsqueciSenha } from "../../services/authStorageService";
+import { getCidadeEsqueciSenha, getMatriculaEsqueciSenha, getTokenEsqueciSenha } from "../../services/authStorageService";
 
 
 const { width } = Dimensions.get('window');
@@ -20,6 +20,7 @@ const AlterarSenhaScreen: React.FC<Props> = ({ onSave, onCancel }) => {
     const [confirm, setConfirm] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const router = useRouter();
 
     const handleSave = async () => {
         if (!password) {
@@ -41,16 +42,20 @@ const AlterarSenhaScreen: React.FC<Props> = ({ onSave, onCancel }) => {
         try {
             const matricula = await getMatriculaEsqueciSenha();
             const cidade = await getCidadeEsqueciSenha();
+            const token = await getTokenEsqueciSenha();
             const payload = {
-                novaSenha: password,
                 matricula: matricula,
-                cidade: cidade
+                senhaAtual: token,
+                novaSenha: password,
+                codigoCidade: cidade,
             };
-            const response = await apiRequest('/Usuario/alterar-senha', 'POST', payload);
-            if (response.sucesso || response.status === 200) {
+            const response = await apiRequest('/Auth/trocar-senha', 'POST', payload);
+            if (response.sucesso || response.status === 200 || response === `Senha alterada com sucesso.`) {
                 Alert.alert('Sucesso', 'Senha alterada com sucesso!', [
-                    { text: 'OK', onPress: () => onSave(password) }
+                    { text: 'OK' }
                 ]);
+                router.navigate('/auth/login')
+
             } else {
                 Alert.alert('Erro', response.message || 'Não foi possível alterar a senha');
             }
@@ -98,7 +103,7 @@ const AlterarSenhaScreen: React.FC<Props> = ({ onSave, onCancel }) => {
 
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => onSave(password)}
+                    onPress={() => handleSave()}
                 >
                     <Text style={styles.saveButtonText}>Salvar</Text>
                 </TouchableOpacity>

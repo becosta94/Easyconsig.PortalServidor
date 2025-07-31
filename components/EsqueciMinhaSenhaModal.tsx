@@ -5,7 +5,7 @@ import CirculoCheck from './CirculoCheck';
 import { useRouter } from 'expo-router';
 import CidadeSelect from '@/components/CidadeSelect';
 import { apiRequest } from "../services/apiService";
-import { saveCidadeEsqueciSenha, saveMatriculaEsqueciSenha } from "../services/authStorageService";
+import { saveCidadeEsqueciSenha, saveMatriculaEsqueciSenha, saveCpfEsqueciSenha, saveEmailEsqueciSenha } from "../services/authStorageService";
 
 type EsqueciSenhaModalProps = {
   visible: boolean;
@@ -20,7 +20,11 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
   const [email, setEmail] = useState<string>('');
   const [matricula, setMatricula] = useState<string>('');
   const [cidade, setCidade] = useState('');
+  const [cpf, setCpf] = useState('');
   const [cidadeError, setCidadeError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [matriculaError, setMatriculaError] = useState('');
+  const [cpfError, setCpfError] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
   const [sent, setSent] = useState<boolean>(false);
   const router = useRouter();
@@ -36,7 +40,7 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
         setEmail('');
         setMatricula('');
         onClose();
-      }, 3000);
+      }, 5000);
     }
     return () => clearTimeout(timer);
   }, [sent]);
@@ -45,15 +49,16 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
     if (!email) return;
     setLoading(true);
     try {
-      // Substitua pela sua API real
       const payload = {
         email: email,
         matricula: matricula,
         codigoCidade: cidade,
       }
-      const response = await apiRequest("/Auth/resetar-senha", "POST", payload);
+      await apiRequest("/Auth/resetar-senha", "POST", payload);
       await saveCidadeEsqueciSenha(cidade);
       await saveMatriculaEsqueciSenha(matricula);
+      await saveCpfEsqueciSenha(cpf);
+      await saveEmailEsqueciSenha(email);
       setSent(true);
     } catch (error) {
       setError('Não foi possível trocar a senha, entre em contato com a administração')
@@ -86,7 +91,7 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
           {sent ? (
             <>
               <CirculoCheck />
-              <Text style={styles.sentText}>E-mail enviado</Text>
+              <Text style={styles.sentText}>Se o e-mail for válido, uma nova senha será enviada para o endereço informado. Aguarde, você será redirecionado...</Text>
             </>
           ) : (
             <>
@@ -95,7 +100,10 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
                 setCidade={setCidade}
                 cidadeError={cidadeError}
                 setCidadeError={setCidadeError}
+                backgroundColor="#FFF"
               />
+              {cidadeError ? <Text style={styles.errorText}>{cidadeError}</Text> : null}
+
               <View style={styles.inputContainer}>
                 <MaterialIcons name="email" size={24} color="#333" style={styles.inputIcon} />
                 <TextInput
@@ -109,6 +117,23 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
                   editable={!loading}
                 />
               </View>
+              {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+
+              <View style={styles.inputContainer}>
+                <Ionicons name="person-outline" size={24} color="#333" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="CPF"
+                  placeholderTextColor="#333"
+                  value={cpf}
+                  onChangeText={setCpf}
+                  keyboardType="numeric"
+                  autoCapitalize="none"
+                  editable={!loading}
+                />
+              </View>
+              {cpfError ? <Text style={styles.errorText}>{cpfError}</Text> : null}
+
               <View style={styles.inputContainer}>
                 <Ionicons name="person-outline" size={24} color="#333" style={styles.inputIcon} />
                 <TextInput
@@ -122,8 +147,43 @@ const EsqueciSenhaModal: React.FC<EsqueciSenhaModalProps> = ({ visible, onClose 
                   editable={!loading}
                 />
               </View>
+              {matriculaError ? <Text style={styles.errorText}>{matriculaError}</Text> : null}
               {error ? <Text style={styles.errorText}>{error}</Text> : null}
-              <TouchableOpacity style={styles.button} onPress={handleSend} disabled={loading || !email}>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  if (!cidade) {
+                    setCidadeError('Selecione a cidade');
+                    return;
+                  } else {
+                    setCidadeError('');
+                  }
+
+                  if (!email) {
+                    setEmailError('Insira um e-mail');
+                    return;
+                  } else {
+                    setEmailError('');
+                  }
+
+                  if (!cpf) {
+                    setCpfError('Insira o CPF');
+                    return;
+                  } else {
+                    setCpfError('');
+                  }
+
+                  if (!matricula) {
+                    setMatriculaError('Insira a matricula');
+                    return;
+                  } else {
+                    setMatriculaError('');
+                  }
+
+                  handleSend();
+                }}
+              >
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
@@ -219,7 +279,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   sentText: {
-    fontSize: 20,
+    fontSize: 14,
     color: '#222',
     fontWeight: '500',
     marginTop: 8,
