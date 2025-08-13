@@ -10,6 +10,7 @@ export type Proposta = {
   quantidadeParcelas: string;
   consignataria: string;
   cdPropostaEmprestimo: string;
+  flDeferido: string;
 };
 
 type PropostaCardProps = Proposta & {
@@ -28,6 +29,7 @@ const PropostaCard: React.FC<PropostaCardProps> = ({
   dtAceite,
   quantidadeParcelas,
   consignataria,
+  flDeferido,
   onAccept,
 }) => {
   const [showButton, setShowButton] = useState(false);
@@ -35,8 +37,7 @@ const PropostaCard: React.FC<PropostaCardProps> = ({
   useEffect(() => {
     const fetchFlag = async () => {
       try {
-        const value = await getFlagAceite();
-        setShowButton(value === 'S');
+        setShowButton(flDeferido !== 'S');
       } catch (e) {
         setShowButton(false);
       }

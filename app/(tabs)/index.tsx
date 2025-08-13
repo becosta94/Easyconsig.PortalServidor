@@ -29,7 +29,6 @@ export default function Home() {
       const response1 = await apiRequest('/Servidor/dados', `GET`) // coloque a URL correta aqui
       const response2 = await apiRequest('/Contratos', `GET`)
       const response3 = await apiRequest('/Propostas', `GET`)
-      console.log(response2);
       setHeaderData(response1);
       setContractsUser(response2);
       setpropostas(response3);
@@ -58,12 +57,14 @@ export default function Home() {
           {
             text: 'Confirmar', onPress: async () => {
               const payload = { propostaId: id };
-              const response = await apiRequest('/Propostas/aceite', 'POST', payload);
-              if (response.message) {
+              console.log('response');
+              try {
+                await apiRequest('/Propostas/aceite', 'POST', payload);
                 Alert.alert('Sucesso', 'Proposta aceita com sucesso!');
                 await fetchHeaderData();
-              } else {
-                Alert.alert('Erro', 'Não foi possível aceitar a proposta.');
+
+              } catch (error: any) {
+                Alert.alert('Erro', error.message);
               }
             }
           }

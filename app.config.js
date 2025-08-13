@@ -35,7 +35,7 @@ export default () => ({
     },
     extra: {
       API_URL: "https://apiapp.easyconsig.com.br/api",
-      ENV:  "production",
+      ENV: "production",
       eas: {
         "projectId": "fb4be8b3-32b4-4388-a83b-423a176f2561"
       }
@@ -54,6 +54,12 @@ export default () => ({
         }
 
       ]
-    ]
+    ],
+    ios: {
+      bundleIdentifier: "br.com.easyconsig",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false
+      }
+    }
   }
 });
